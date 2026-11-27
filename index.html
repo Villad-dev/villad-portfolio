@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vladyslav Humennyi | Mobile Engineer Portfolio (Pip-Boy 3000)</title>
+  <meta name="description" content="Interactive Pip-Boy 3000 WebGL portfolio of Vladyslav Humennyi - Mobile Engineer specialized in Flutter, Native Android/iOS, Cross-Platform SDKs, and On-Device AI.">
+  <meta name="theme-color" content="#05080b">
+  <meta name="robots" content="index, follow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Vladyslav Humennyi | Mobile Engineer Portfolio (Pip-Boy 3000)">
+  <meta property="og:description" content="Interactive 3D Pip-Boy 3000 WebGL portfolio of Vladyslav Humennyi - Mobile Engineer specialized in Flutter, Native Android/iOS, Cross-Platform SDKs, and On-Device AI.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2305080b'/%3E%3Ccircle cx='50' cy='50' r='36' stroke='%231aff24' stroke-width='6' fill='%23020d02'/%3E%3Ctext x='50' y='62' font-family='monospace' font-size='34' font-weight='bold' fill='%231aff24' text-anchor='middle'%3EPB%3C/text%3E%3C/svg%3E">
+
+  <!-- Resource Preconnects -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://esm.sh">
+
+  <!-- Core Styles -->
+  <link rel="preload" href="./assets/fonts/monofonto.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/components/canvas.css">
+  <link rel="stylesheet" href="./styles/components/ui.css">
+
+  <!-- Import Maps for direct browser execution without build step -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/",
+        "gsap": "https://esm.sh/gsap@3.12.5"
+      }
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="spinner" id="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">Loading 3D Pip-Boy Model & Mapping Real Surface Texture...</div>
+    <div id="file-protocol-warning" style="display: none; max-width: 450px; text-align: center; font-size: 0.85rem; color: #cbd5e1; margin-top: 0.5rem; background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+      <strong>Local Server Required</strong><br>
+      Modern WebGL & 3D JavaScript modules cannot run via direct file opening (<code>file:///</code>) due to browser CORS security policies.<br><br>
+      Please serve the project folder using a local server (e.g., VS Code <em>Live Server</em> or terminal command <code>python3 -m http.server 8000</code>).
+    </div>
+  </div>
+
+  <script>
+    if (window.location.protocol === 'file:') {
+      const text = document.getElementById('loading-text');
+      const warning = document.getElementById('file-protocol-warning');
+      if (text) text.textContent = 'Local Server Required to load 3D Scripts';
+      if (warning) warning.style.display = 'block';
+    }
+  </script>
+
+  <!-- 3D Canvas -->
+  <div class="canvas-container">
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Floating HUD Controls Bar (Clicking directly on the 3D model screen interacts via 3D Raycasting) -->
+    <div class="ui-layer" style="pointer-events: none;">
+      <header class="navbar" style="pointer-events: auto;">
+        <div class="logo" style="color: #1aff24; font-family: 'monofonto', 'Share Tech Mono', monospace; text-shadow: 0 0 10px rgba(26, 255, 36, 0.6);">
+          <span>VLADYSLAV HUMENNYI</span>
+          <span class="logo-badge" style="background: rgba(26, 255, 36, 0.2); border: 1px solid #1aff24; color: #1aff24;">MOBILE ENG</span>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-secondary" id="btn-zoom-toggle" style="background: rgba(2, 13, 2, 0.9); border: 1px solid #1aff24; color: #1aff24; font-family: 'monofonto', 'Share Tech Mono', monospace; box-shadow: 0 0 12px rgba(26,255,36,0.35);">
+            🔍 3D CASING VIEW [TAB]
+          </button>
+        </div>
+      </header>
+
+      <footer id="hud-footer" style="pointer-events: auto; background: rgba(2, 13, 2, 0.9); border: 1px solid #1aff24; padding: 0.75rem 1.25rem; border-radius: 8px; font-family: 'monofonto', 'Share Tech Mono', monospace; font-size: 0.85rem; color: #1aff24; display: flex; justify-content: space-between; align-items: center; max-width: 620px; margin: 0 auto; box-shadow: 0 0 15px rgba(26,255,36,0.35);">
+        <span>✦ CLICK 3D SCREEN, BUTTONS, WHEEL & KNOB TO INTERACT</span>
+        <span>[TAB] FULL SCREEN MODE | [1-3] MODES</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Entry File -->
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
